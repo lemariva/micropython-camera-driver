@@ -37,7 +37,7 @@ To include the camera support to MicroPython, you need to compile the firmware f
            extern const struct _mp_obj_module_t mp_module_camera;
         ```
         in the code block below `// extra built in modules to add to the list of known ones` (approx. line 184)
-        
+
         2. add the line:
         ```
             { MP_OBJ_NEW_QSTR(MP_QSTR_camera), (mp_obj_t)&mp_module_camera }, \
@@ -91,10 +91,10 @@ To include the camera support to MicroPython, you need to compile the firmware f
     ```
 
 4. Compile and deploy MicroPython following the instructions from this [tutorial](https://lemariva.com/blog/2020/03/tutorial-getting-started-micropython-v20). But, use the following compiling options:
-```sh
-make BOARD=GENERIC_CAM PYTHON=python3 MICROPY_PY_BTREE=0 -j
-make BOARD=GENERIC_CAM PYTHON=python3 MICROPY_PY_BTREE=0 -j deploy
-```
+    ```sh
+    make BOARD=GENERIC_CAM PYTHON=python3 MICROPY_PY_BTREE=0 -j
+    make BOARD=GENERIC_CAM PYTHON=python3 MICROPY_PY_BTREE=0 -j deploy
+    ```
 
 ## Firmware
 I've included a compiled MicroPython firmware with camera and BLE support (check the `firmware` folder). The firmware was compiled using esp-idf 4.x (hash 4c81978a3).
