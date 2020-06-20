@@ -37,7 +37,8 @@ To include the camera support to MicroPython, you need to compile the firmware f
            extern const struct _mp_obj_module_t mp_module_camera;
         ```
         in the code block below `// extra built in modules to add to the list of known ones` (approx. line 184)
-        1. add the line:
+        
+        2. add the line:
         ```
             { MP_OBJ_NEW_QSTR(MP_QSTR_camera), (mp_obj_t)&mp_module_camera }, \
         ```
@@ -66,6 +67,7 @@ To include the camera support to MicroPython, you need to compile the firmware f
             modcamera.c \
         ```
         inside the `SRC_C = \` block (approx. line 329 - after the above insertion)
+
         3. add the lines:
         ```
             ESP32_CAM_O = $(patsubst %.c,%.o,\
@@ -75,6 +77,7 @@ To include the camera support to MicroPython, you need to compile the firmware f
             )
         ```
         above the line `OBJ_ESPIDF =` (approx. line 615 - after the above insertions)
+
         4. add the line:
         ```
             $(eval $(call gen_espidf_lib_rule,esp32_cam,$(ESP32_CAM_O)))
