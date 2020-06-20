@@ -81,7 +81,13 @@ To include the camera support to MicroPython, you need to compile the firmware f
         ```
         in the block above `ifeq ($(ESPIDF_CURHASH),$(ESPIDF_SUPHASH_V4))` (approx. line 655 - after the above insertions)
 
-3. Compile and deploy MicroPython following the instructions from this [tutorial](https://lemariva.com/blog/2020/03/tutorial-getting-started-micropython-v20). But, use the following compiling options:
+3. Clone the `https://github.com/lemariva/esp32-camera` repository inside the `~/esp/esp-idf/components` folder.
+    ```sh
+        cd ~/esp/esp-idf/components
+        git clone https://github.com/lemariva/esp32-camera.git
+    ```
+
+4. Compile and deploy MicroPython following the instructions from this [tutorial](https://lemariva.com/blog/2020/03/tutorial-getting-started-micropython-v20). But, use the following compiling options:
 ```sh
 make BOARD=GENERIC_CAM PYTHON=python3 MICROPY_PY_BTREE=0 -j
 make BOARD=GENERIC_CAM PYTHON=python3 MICROPY_PY_BTREE=0 -j deploy
