@@ -45,11 +45,11 @@ To include the camera support to MicroPython, you need to compile the firmware f
         in the code block below `#define MICROPY_PORT_BUILTIN_MODULES \` (approx. line 194/195)
 
     * `main.c`: modify the lines inside the `#if CONFIG_ESP32_SPIRAM_SUPPORT || CONFIG_SPIRAM_SUPPORT`, they should look like:
-    ```
-        mp_task_heap_size = 2 * 1024 * 1024;
-        void *mp_task_heap = malloc(mp_task_heap_size);
-        ESP_LOGI("main", "Allocated %dK for micropython heap at %p", mp_task_heap_size/1024, mp_task_heap);
-    ```
+        ```
+            mp_task_heap_size = 2 * 1024 * 1024;
+            void *mp_task_heap = malloc(mp_task_heap_size);
+            ESP_LOGI("main", "Allocated %dK for micropython heap at %p", mp_task_heap_size/1024, mp_task_heap);
+        ```
 
     * `Makefile`:
         1. add the lines:
