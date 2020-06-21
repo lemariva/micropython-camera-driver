@@ -1,19 +1,3 @@
-/*
-Copyright [2020] [Mauro Riva - info@lemariva.com]
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
 #include "esp_camera.h"
 #include "esp_log.h"
 
@@ -56,6 +40,7 @@ STATIC void camera_init_helper(camera_obj_t *camera, size_t n_pos_args, const mp
         ARG_XCLK,
         ARG_SIOD,
         ARG_SIOC,
+        ARG_FREQ,
     };
 
     //{ MP_QSTR_d0,              MP_ARG_KW_ONLY                   | MP_ARG_OBJ,   {.u_obj = MP_OBJ_NULL} },
@@ -78,6 +63,7 @@ STATIC void camera_init_helper(camera_obj_t *camera, size_t n_pos_args, const mp
         { MP_QSTR_xclk,            MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_XCLK} },
         { MP_QSTR_siod,            MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_SIOD} }, 
         { MP_QSTR_sioc,            MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_SIOC} },
+        { MP_QSTR_xclk_freq,       MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = XCLK_FREQ_10MHz} }, 
     };
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
@@ -90,6 +76,12 @@ STATIC void camera_init_helper(camera_obj_t *camera, size_t n_pos_args, const mp
         (format != PIXFORMAT_GRAYSCALE) &&
         (format != PIXFORMAT_RGB565)) {
         mp_raise_ValueError(MP_ERROR_TEXT("Image format is not valid"));
+    }
+
+    int32_t xclk_freq = args[ARG_FREQ].u_int;
+    if ((format != XCLK_FREQ_10MHz) &&
+        (xclk_freq != XCLK_FREQ_20MHz)) {
+        mp_raise_ValueError(MP_ERROR_TEXT("xclk frequency is not valid"));
     }
 
     // configuring camera
@@ -113,8 +105,8 @@ STATIC void camera_init_helper(camera_obj_t *camera, size_t n_pos_args, const mp
     camera->config.jpeg_quality = args[ARG_quality].u_int;  //0-63 lower number means higher quality
 
     // defaul parameters
-        //XCLK 20MHz or 10MHz for OV2640 double FPS (Experimental)
-    camera->config.xclk_freq_hz = 20000000;
+    //XCLK 20MHz or 10MHz for OV2640 double FPS (Experimental)
+    camera->config.xclk_freq_hz = args[ARG_FREQ].u_int;
     camera->config.ledc_timer = LEDC_TIMER_0;
     camera->config.ledc_channel = LEDC_CHANNEL_0;
     camera->config.frame_size = FRAMESIZE_UXGA;//QQVGA-QXGA Do not use sizes above QVGA when not JPEG
@@ -178,6 +170,9 @@ STATIC const mp_rom_map_elem_t camera_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_YUV422),          MP_ROM_INT(PIXFORMAT_YUV422) },
     { MP_ROM_QSTR(MP_QSTR_GRAYSCALE),       MP_ROM_INT(PIXFORMAT_GRAYSCALE) },
     { MP_ROM_QSTR(MP_QSTR_RGB565),          MP_ROM_INT(PIXFORMAT_RGB565) },
+    { MP_ROM_QSTR(MP_QSTR_XCLK_10MHz),      MP_ROM_INT(XCLK_FREQ_10MHz) },
+    { MP_ROM_QSTR(MP_QSTR_XCLK_20MHz),      MP_ROM_INT(XCLK_FREQ_20MHz) },
+
 };
 
 STATIC MP_DEFINE_CONST_DICT(camera_module_globals, camera_module_globals_table);

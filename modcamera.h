@@ -48,5 +48,7 @@ enum { OV2640, OVXXXX};
 #define CAM_PIN_VSYNC   25
 #define CAM_PIN_HREF    23
 #define CAM_PIN_PCLK    22
+#define XCLK_FREQ_10MHz       10000000
+#define XCLK_FREQ_20MHz       20000000
 
 #endif
