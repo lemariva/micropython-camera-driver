@@ -79,7 +79,7 @@ STATIC void camera_init_helper(camera_obj_t *camera, size_t n_pos_args, const mp
     }
 
     int32_t xclk_freq = args[ARG_FREQ].u_int;
-    if ((format != XCLK_FREQ_10MHz) &&
+    if ((xclk_freq != XCLK_FREQ_10MHz) &&
         (xclk_freq != XCLK_FREQ_20MHz)) {
         mp_raise_ValueError(MP_ERROR_TEXT("xclk frequency is not valid"));
     }
