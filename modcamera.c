@@ -20,7 +20,7 @@ typedef struct _camera_obj_t {
 STATIC camera_obj_t camera_obj;
         
 
-STATIC void camera_init_helper(camera_obj_t *camera, size_t n_pos_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+STATIC bool camera_init_helper(camera_obj_t *camera, size_t n_pos_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
       enum {
         ARG_format,
         ARG_quality,
@@ -116,15 +116,25 @@ STATIC void camera_init_helper(camera_obj_t *camera, size_t n_pos_args, const mp
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "Camera Init Failed");
         mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("Camera Init Failed"));
+
+        return false;
     }
+
+    return true;
 }
 
 
 STATIC mp_obj_t camera_init(mp_uint_t n_pos_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
 
-    camera_init_helper(&camera_obj, n_pos_args - 1, pos_args + 1, kw_args);
+    bool camera = camera_init_helper(&camera_obj, n_pos_args - 1, pos_args + 1, kw_args);
     
-    return mp_const_none;
+    if (camera) {
+        return mp_const_true;
+    }
+    else
+    {
+        return mp_const_false;
+    }
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_KW(camera_init_obj, 1, camera_init);
 

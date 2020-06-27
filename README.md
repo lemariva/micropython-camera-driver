@@ -6,6 +6,8 @@ I could have forked the micropython repository and include the camera driver. Ho
 
 Furthermore, I include a compiled version of the firmware, so that you can flash it and start playing with the camera.
 
+For more information visit this tutorial: https://lemariva.com/blog/default/default/micropython-support-cameras-m5camera-esp32-cam-etc
+
 ## Example
 ```python
 import camera
@@ -23,19 +25,34 @@ camera.init(0, d0=32, d1=35, d2=34, d3=5, d4=39, d5=18, d6=36, d7=19,
 # but the image was pixelated and somehow green.
 
 buf = camera.capture()
+
 ```
+
 ### Important
 * Except when using CIF or lower resolution with JPEG, the driver requires PSRAM to be installed and activated. This is activated, but it is limited due that MicroPython needs RAM.
 * Using YUV or RGB puts a lot of strain on the chip because writing to PSRAM is not particularly fast. The result is that image data might be missing. This is particularly true if WiFi is enabled. If you need RGB data, it is recommended that JPEG is captured and then turned into RGB using `fmt2rgb888 or fmt2bmp/frame2bmp`. The conversion is not supported. The formats are included, but I got almost every time out of memory, trying to capture an image in a different format than JPEG.
 
+## Firmware
+I've included a compiled MicroPython firmware with camera and BLE support (check the `firmware` folder). The firmware was compiled using esp-idf 4.x (hash 4c81978a3).
+
+To flash it to the board, you need to type the following:
+```sh
+esptool.py --chip esp32 --port /dev/ttyUSB0 erase_flash
+esptool.py --chip esp32 --port /dev/ttyUSB0 --baud 460800 write_flash -z 0x1000 micropython_3a9d948_esp32_idf4.x_ble_camera.bin
+```
+More information is available in this [tutorial](https://lemariva.com/blog/2020/03/tutorial-getting-started-micropython-v20).
+
+If you want to compile your driver from scratch follow the next section:
+
 ## DIY
-To include the camera support to MicroPython, you need to compile the firmware from scratch. To do that follow these steps:
+Read this section if you want to include the camera support to MicroPython from scratch. To do that follow these steps:
+
 1. Clone the MicroPython repository:
     ```
     git clone --recursive https://github.com/micropython/micropython.git
     ```
     Note: The MicroPython repo changes a lot, I've done this using the version with the hash 3a9d948032e27f690e1fb09084c36bd47b1a75a0.
-2. Copy the files of this repository inside the folder `ports/esp32`. If you don't want to replace the files `mpconfigport.h`, `main.h` and `Makefile`, make the following modifications to the originals:
+2. Copy the files of this repository inside the folder `ports/esp32`. If you don't want to replace the files `mpconfigport.h`, `main.h`, and `Makefile` make the following modifications to the original ones:
     * `mpconfigport.c`
         1. add the line
         ```
@@ -101,12 +118,3 @@ To include the camera support to MicroPython, you need to compile the firmware f
     make BOARD=GENERIC_CAM PYTHON=python3 MICROPY_PY_BTREE=0 -j deploy
     ```
 
-## Firmware
-I've included a compiled MicroPython firmware with camera and BLE support (check the `firmware` folder). The firmware was compiled using esp-idf 4.x (hash 4c81978a3).
-
-To deploy it, you need to type the following:
-```sh
-esptool.py --chip esp32 --port /dev/ttyUSB0 erase_flash
-esptool.py --chip esp32 --port /dev/ttyUSB0 --baud 460800 write_flash -z 0x1000 micropython_3a9d948_esp32_idf4.x_ble_camera.bin
-```
-More information is available in this [tutorial](https://lemariva.com/blog/2020/03/tutorial-getting-started-micropython-v20).
