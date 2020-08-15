@@ -24,6 +24,19 @@ camera.init(0, d0=32, d1=35, d2=34, d3=5, d4=39, d5=18, d6=36, d7=19,
 # You can try using a faster xclk (20MHz), this also worked with the esp32-cam and m5camera 
 # but the image was pixelated and somehow green.
 
+# T-Camera Mini (green PCB) - https://bit.ly/3asDLwn
+import axp202 # source https://github.com/lewisxhe/AXP202_PythonLibrary
+# USB current limit must be disabled (otherwise init fails)
+axp=axp202.PMU( scl=22, sda=21, address=axp202.AXP192_SLAVE_ADDRESS  )
+limiting=axp.read_byte( axp202.AXP202_IPS_SET )
+limiting &= 0xfc
+axp.write_byte( axp202.AXP202_IPS_SET, limiting )
+
+camera.init(0, d0=5, d1=14, d2=4, d3=15, d4=18, d5=23, d6=36, d7=39, 
+            format=camera.JPEG, xclk_freq=camera.XCLK_20MHz,
+            href=25, vsync=27, reset=-1, pwdn=-1,
+            sioc=12, siod=13, xclk=32, pclk=19)
+
 buf = camera.capture()
 
 ```
