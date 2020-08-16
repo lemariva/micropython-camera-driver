@@ -1,10 +1,8 @@
 # micropython-camera-driver
 
-This repository adds camera (OV2640) support to MicroPython for the ESP32 family. 
+This repository adds camera (OV2640) support to MicroPython for the ESP32 family.
 
 I could have forked the micropython repository and include the camera driver. However, I chose to include in this repository only the files that are required, so that you can always use the last version of MicroPython and add these files to add camera support.
-
-Furthermore, I include a compiled version of the firmware, so that you can flash it and start playing with the camera.
 
 For more information visit this tutorial: https://lemariva.com/blog/default/default/micropython-support-cameras-m5camera-esp32-cam-etc
 
@@ -16,12 +14,12 @@ import camera
 camera.init(0, format=camera.JPEG)  
 
 # M5Camera (Version B) - https://bit.ly/317Xb74
-camera.init(0, d0=32, d1=35, d2=34, d3=5, d4=39, d5=18, d6=36, d7=19, 
+camera.init(0, d0=32, d1=35, d2=34, d3=5, d4=39, d5=18, d6=36, d7=19,
             format=camera.JPEG, xclk_freq=camera.XCLK_10MHz,
             href=26, vsync=25, reset=15, sioc=23, siod=22, xclk=27, pclk=21)   #M5CAMERA
 
 # These parameters: format=camera.JPEG, xclk_freq=camera.XCLK_10MHz are standard for both cameras.
-# You can try using a faster xclk (20MHz), this also worked with the esp32-cam and m5camera 
+# You can try using a faster xclk (20MHz), this also worked with the esp32-cam and m5camera
 # but the image was pixelated and somehow green.
 
 # T-Camera Mini (green PCB) - https://bit.ly/3asDLwn
@@ -32,10 +30,15 @@ limiting=axp.read_byte( axp202.AXP202_IPS_SET )
 limiting &= 0xfc
 axp.write_byte( axp202.AXP202_IPS_SET, limiting )
 
-camera.init(0, d0=5, d1=14, d2=4, d3=15, d4=18, d5=23, d6=36, d7=39, 
+camera.init(0, d0=5, d1=14, d2=4, d3=15, d4=18, d5=23, d6=36, d7=39,
             format=camera.JPEG, xclk_freq=camera.XCLK_20MHz,
             href=25, vsync=27, reset=-1, pwdn=-1,
             sioc=12, siod=13, xclk=32, pclk=19)
+
+# flip up side down
+camera.flip(1)
+# left / right
+camera.mirror(1)
 
 buf = camera.capture()
 
@@ -46,7 +49,7 @@ buf = camera.capture()
 * Using YUV or RGB puts a lot of strain on the chip because writing to PSRAM is not particularly fast. The result is that image data might be missing. This is particularly true if WiFi is enabled. If you need RGB data, it is recommended that JPEG is captured and then turned into RGB using `fmt2rgb888 or fmt2bmp/frame2bmp`. The conversion is not supported. The formats are included, but I got almost every time out of memory, trying to capture an image in a different format than JPEG.
 
 ## Firmware
-I've included a compiled MicroPython firmware with camera and BLE support (check the `firmware` folder). The firmware was compiled using esp-idf 4.x (hash 4c81978a3).
+I've included a compiled MicroPython firmware with camera and BLE support (check the `firmware` folder). The firmware was compiled using esp-idf 4.x (hash 4c81978a3e2220674a432a588292a4c860eef27b).
 
 To flash it to the board, you need to type the following:
 ```sh
@@ -65,8 +68,11 @@ Read this section if you want to include the camera support to MicroPython from 
     git clone --recursive https://github.com/micropython/micropython.git
     ```
     Note: The MicroPython repo changes a lot, I've done this using the version with the hash 3a9d948032e27f690e1fb09084c36bd47b1a75a0.
-2. Copy the files of this repository inside the folder `ports/esp32`. If you don't want to replace the files `mpconfigport.h`, `main.h`, and `Makefile` make the following modifications to the original ones:
-    * `mpconfigport.c`
+2. Copy the files of this repository inside the folder `ports/esp32`.
+   You can create a tgz file `create_tgz.sh` for easy transfer.
+
+   If you don't want to replace the files `mpconfigport.h`, `main.h`, and `Makefile` make the following modifications to the original ones:
+    * `mpconfigport.h`
         1. add the line
         ```
            extern const struct _mp_obj_module_t mp_module_camera;
@@ -130,4 +136,3 @@ Read this section if you want to include the camera support to MicroPython from 
     make BOARD=GENERIC_CAM PYTHON=python3 MICROPY_PY_BTREE=0 -j
     make BOARD=GENERIC_CAM PYTHON=python3 MICROPY_PY_BTREE=0 -j deploy
     ```
-

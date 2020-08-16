@@ -18,7 +18,7 @@ typedef struct _camera_obj_t {
 } camera_obj_t;
 
 STATIC camera_obj_t camera_obj;
-        
+
 
 STATIC bool camera_init_helper(camera_obj_t *camera, size_t n_pos_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
       enum {
@@ -49,26 +49,26 @@ STATIC bool camera_init_helper(camera_obj_t *camera, size_t n_pos_args, const mp
         { MP_QSTR_quality,         MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = 12} },
         { MP_QSTR_d0,              MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_D0} },
         { MP_QSTR_d1,              MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_D1} },
-        { MP_QSTR_d2,              MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_D2} },    
-        { MP_QSTR_d3,              MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_D3} },    
+        { MP_QSTR_d2,              MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_D2} },
+        { MP_QSTR_d3,              MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_D3} },
         { MP_QSTR_d4,              MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_D4} },
-        { MP_QSTR_d5,              MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_D5} },   
-        { MP_QSTR_d6,              MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_D6} },    
-        { MP_QSTR_d7,              MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_D7} },   
-        { MP_QSTR_vsync,           MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_VSYNC} },    
-        { MP_QSTR_href,            MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_HREF} },   
-        { MP_QSTR_pclk,            MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_PCLK} },    
+        { MP_QSTR_d5,              MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_D5} },
+        { MP_QSTR_d6,              MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_D6} },
+        { MP_QSTR_d7,              MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_D7} },
+        { MP_QSTR_vsync,           MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_VSYNC} },
+        { MP_QSTR_href,            MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_HREF} },
+        { MP_QSTR_pclk,            MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_PCLK} },
         { MP_QSTR_pwdn,            MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_PWDN} },
         { MP_QSTR_reset,           MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_RESET} },
         { MP_QSTR_xclk,            MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_XCLK} },
-        { MP_QSTR_siod,            MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_SIOD} }, 
+        { MP_QSTR_siod,            MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_SIOD} },
         { MP_QSTR_sioc,            MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_SIOC} },
-        { MP_QSTR_xclk_freq,       MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = XCLK_FREQ_10MHz} }, 
+        { MP_QSTR_xclk_freq,       MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = XCLK_FREQ_10MHz} },
     };
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all(n_pos_args, pos_args, kw_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
-    
+
     // TODO:---- Check validity of arguments ----
     int8_t format = args[ARG_format].u_int;
     if ((format != PIXFORMAT_JPEG) &&
@@ -127,7 +127,7 @@ STATIC bool camera_init_helper(camera_obj_t *camera, size_t n_pos_args, const mp
 STATIC mp_obj_t camera_init(mp_uint_t n_pos_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
 
     bool camera = camera_init_helper(&camera_obj, n_pos_args - 1, pos_args + 1, kw_args);
-    
+
     if (camera) {
         return mp_const_true;
     }
@@ -167,6 +167,173 @@ STATIC mp_obj_t camera_capture(){
 }
 STATIC MP_DEFINE_CONST_FUN_OBJ_0(camera_capture_obj, camera_capture);
 
+STATIC mp_obj_t camera_flip(mp_obj_t direction){
+    sensor_t * s = esp_camera_sensor_get();
+    if (!s) {
+        ESP_LOGE(TAG, "Flipping Failed");
+        return mp_const_false;
+      }
+    int dir = mp_obj_get_int(direction);
+    s->set_vflip(s, dir);
+    return mp_const_none;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(camera_flip_obj, camera_flip);
+
+STATIC mp_obj_t camera_mirror(mp_obj_t direction){
+    sensor_t * s = esp_camera_sensor_get();
+    if (!s) {
+        ESP_LOGE(TAG, "Mirroring Failed");
+        return mp_const_false;
+      }
+    int dir = mp_obj_get_int(direction);
+    s->set_hmirror(s, dir);
+    return mp_const_none;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(camera_mirror_obj, camera_mirror);
+
+STATIC mp_obj_t camera_framesize(mp_obj_t what){
+    sensor_t * s = esp_camera_sensor_get();
+    if (!s) {
+        ESP_LOGE(TAG, "Framesize Failed");
+        return mp_const_false;
+      }
+    int size = mp_obj_get_int(what);
+    /* same as in screen.h */
+    if (size == 0) {
+      s->set_framesize(s, FRAMESIZE_96X96); // 96x96
+    } else if (size == 1) {
+      s->set_framesize(s, FRAMESIZE_QQVGA); // 160x120
+    } else if (size == 2) {
+      s->set_framesize(s, FRAMESIZE_QCIF); // 176x144
+    } else if (size == 3) {
+      s->set_framesize(s, FRAMESIZE_HQVGA); // 240x176
+    } else if (size == 4) {
+      s->set_framesize(s, FRAMESIZE_240X240); // 240x240
+    } else if (size == 5) {
+      s->set_framesize(s, FRAMESIZE_QVGA); // 320x240
+    } else if (size == 6) {
+      s->set_framesize(s, FRAMESIZE_CIF); // 400x296
+    } else if (size == 7) {
+      s->set_framesize(s, FRAMESIZE_HVGA); // 480x320
+    } else if (size == 8) {
+      s->set_framesize(s, FRAMESIZE_VGA); // 640x480
+    } else if (size == 9) {
+      s->set_framesize(s, FRAMESIZE_SVGA); // 800x600
+    } else if (size == 10) {
+      s->set_framesize(s, FRAMESIZE_XGA); // 1024x768  (default)
+    } else if (size == 11) {
+      s->set_framesize(s, FRAMESIZE_HD); // 1280x720
+    } else if (size == 12) {
+      s->set_framesize(s, FRAMESIZE_SXGA); // 1280x1024
+    } else if (size == 13) {
+      s->set_framesize(s, FRAMESIZE_UXGA); // 1600x1200
+    } else if (size == 14) {
+      s->set_framesize(s, FRAMESIZE_FHD); // 1920x1080
+    } else if (size == 15) {
+      s->set_framesize(s, FRAMESIZE_P_HD); // 720x1280
+    } else if (size == 16) {
+      s->set_framesize(s, FRAMESIZE_P_3MP); // 864x1536
+    } else if (size == 17) {
+      s->set_framesize(s, FRAMESIZE_QXGA); // 2048x1536
+    } else if (size == 18) {
+      s->set_framesize(s, FRAMESIZE_QHD); // 2560x1440
+    } else if (size == 19) {
+      s->set_framesize(s, FRAMESIZE_WQXGA); // 2560x1600
+    } else if (size == 20) {
+      s->set_framesize(s, FRAMESIZE_P_FHD); // 1080x1920
+    } else if (size == 21) {
+      s->set_framesize(s, FRAMESIZE_QSXGA); // 2560x1920
+    }
+
+    return mp_const_none;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(camera_framesize_obj, camera_framesize);
+
+STATIC mp_obj_t camera_quality(mp_obj_t what){
+    sensor_t * s = esp_camera_sensor_get();
+    if (!s) {
+        ESP_LOGE(TAG, "Quality Failed");
+        return mp_const_false;
+      }
+    int val = mp_obj_get_int(what); // 10-63 lower number means higher quality
+    s->set_quality(s, val);
+    return mp_const_none;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(camera_quality_obj, camera_quality);
+
+STATIC mp_obj_t camera_contrast(mp_obj_t what){
+    //acquire a frame
+    sensor_t * s = esp_camera_sensor_get();
+    if (!s) {
+        ESP_LOGE(TAG, "Contrast Failed");
+        return mp_const_false;
+      }
+    int val = mp_obj_get_int(what); // -2,2 (default 0). 2 highcontrast
+    s->set_contrast(s, val);
+    return mp_const_none;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(camera_contrast_obj, camera_contrast);
+
+STATIC mp_obj_t camera_saturation(mp_obj_t what){
+    //acquire a frame
+    sensor_t * s = esp_camera_sensor_get();
+    if (!s) {
+        ESP_LOGE(TAG, "Saturation Failed");
+        return mp_const_false;
+      }
+    int val = mp_obj_get_int(what);
+    s->set_saturation(s, val); // -2,2 (default 0). -2 grayscale
+    return mp_const_none;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(camera_saturation_obj, camera_saturation);
+
+STATIC mp_obj_t camera_brightness(mp_obj_t what){
+    sensor_t * s = esp_camera_sensor_get();
+    if (!s) {
+        ESP_LOGE(TAG, "Brightness Failed");
+        return mp_const_false;
+      }
+    int val = mp_obj_get_int(what);
+    s->set_brightness(s, val); // -2,2 (default 0). 2 brightest
+    return mp_const_none;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(camera_brightness_obj, camera_brightness);
+
+STATIC mp_obj_t camera_speffect(mp_obj_t what){
+    sensor_t * s = esp_camera_sensor_get();
+    if (!s) {
+        ESP_LOGE(TAG, "Special Effect Failed");
+        return mp_const_false;
+      }
+    int val = mp_obj_get_int(what);
+    s->set_special_effect(s, val); // 0-6 (default 0).
+                                   // 0 - no effect
+				   // 1 - negative
+				   // 2 - black and white
+				   // 3 - reddish
+				   // 4 - greenish
+				   // 5 - blue
+				   // 6 - retro
+    return mp_const_none;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(camera_speffect_obj, camera_speffect);
+
+STATIC mp_obj_t camera_whitebalance(mp_obj_t what){
+    sensor_t * s = esp_camera_sensor_get();
+    if (!s) {
+        ESP_LOGE(TAG, "White Balance Failed");
+        return mp_const_false;
+      }
+    int val = mp_obj_get_int(what);
+    s->set_wb_mode(s, val); // 0-4 (default 0).
+                                   // 0 - no effect
+                                   // 1 - sunny
+                                   // 2 - cloudy
+                                   // 3 - office
+                                   // 4 - home
+    return mp_const_none;
+}
+STATIC MP_DEFINE_CONST_FUN_OBJ_1(camera_whitebalance_obj, camera_whitebalance);
 
 STATIC const mp_rom_map_elem_t camera_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_camera) },
@@ -174,6 +341,15 @@ STATIC const mp_rom_map_elem_t camera_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_init), MP_ROM_PTR(&camera_init_obj) },
     { MP_ROM_QSTR(MP_QSTR_deinit), MP_ROM_PTR(&camera_deinit_obj) },
     { MP_ROM_QSTR(MP_QSTR_capture), MP_ROM_PTR(&camera_capture_obj) },
+    { MP_ROM_QSTR(MP_QSTR_flip), MP_ROM_PTR(&camera_flip_obj) },
+    { MP_ROM_QSTR(MP_QSTR_mirror), MP_ROM_PTR(&camera_mirror_obj) },
+    { MP_ROM_QSTR(MP_QSTR_framesize), MP_ROM_PTR(&camera_framesize_obj) },
+    { MP_ROM_QSTR(MP_QSTR_quality), MP_ROM_PTR(&camera_quality_obj) },
+    { MP_ROM_QSTR(MP_QSTR_contrast), MP_ROM_PTR(&camera_contrast_obj) },
+    { MP_ROM_QSTR(MP_QSTR_saturation), MP_ROM_PTR(&camera_saturation_obj) },
+    { MP_ROM_QSTR(MP_QSTR_brightness), MP_ROM_PTR(&camera_brightness_obj) },
+    { MP_ROM_QSTR(MP_QSTR_speffect), MP_ROM_PTR(&camera_speffect_obj) },
+    { MP_ROM_QSTR(MP_QSTR_whitebalance), MP_ROM_PTR(&camera_whitebalance_obj) },
 
     // Constants
     { MP_ROM_QSTR(MP_QSTR_JPEG),            MP_ROM_INT(PIXFORMAT_JPEG) },
