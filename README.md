@@ -4,7 +4,7 @@ This repository adds camera (OV2640) support to MicroPython for the ESP32 family
 
 I could have forked the micropython repository and include the camera driver. However, I chose to include in this repository only the files that are required, so that you can always use the last version of MicroPython and add these files to add camera support.
 
-For more information visit this tutorial: https://lemariva.com/blog/default/default/micropython-support-cameras-m5camera-esp32-cam-etc
+For more information visit this tutorial: https://lemariva.com/blog/2020/06/micropython-support-cameras-m5camera-esp32-cam-etc
 
 ## Example
 ```python
