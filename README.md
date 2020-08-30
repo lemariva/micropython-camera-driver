@@ -49,12 +49,12 @@ buf = camera.capture()
 * Using YUV or RGB puts a lot of strain on the chip because writing to PSRAM is not particularly fast. The result is that image data might be missing. This is particularly true if WiFi is enabled. If you need RGB data, it is recommended that JPEG is captured and then turned into RGB using `fmt2rgb888 or fmt2bmp/frame2bmp`. The conversion is not supported. The formats are included, but I got almost every time out of memory, trying to capture an image in a different format than JPEG.
 
 ## Firmware
-I've included a compiled MicroPython firmware with camera and BLE support (check the `firmware` folder). The firmware was compiled using esp-idf 4.x (hash 4c81978a3e2220674a432a588292a4c860eef27b).
+I've included a compiled MicroPython firmware with camera and BLE support (check the `firmware` folder). The firmware was compiled using esp-idf 4.x (hash 836bca9956d9f02b9c0f6f396dc76cbd1586de10).
 
 To flash it to the board, you need to type the following:
 ```sh
 esptool.py --chip esp32 --port /dev/ttyUSB0 erase_flash
-esptool.py --chip esp32 --port /dev/ttyUSB0 --baud 460800 write_flash -z 0x1000 micropython_3a9d948_esp32_idf4.x_ble_camera.bin
+esptool.py --chip esp32 --port /dev/ttyUSB0 --baud 460800 write_flash -z 0x1000 micropython_836bca9_esp32_idf4.x_ble_camera.bin
 ```
 More information is available in this [tutorial](https://lemariva.com/blog/2020/03/tutorial-getting-started-micropython-v20).
 
@@ -67,11 +67,10 @@ Read this section if you want to include the camera support to MicroPython from 
     ```
     git clone --recursive https://github.com/micropython/micropython.git
     ```
-    Note: The MicroPython repo changes a lot, I've done this using the version with the hash 3a9d948032e27f690e1fb09084c36bd47b1a75a0.
-2. Copy the files of this repository inside the folder `ports/esp32`.
-   You can create a tgz file `create_tgz.sh` for easy transfer.
+    Note: The MicroPython repo changes a lot, I've done this using the version with the hash 836bca9956d9f02b9c0f6f396dc76cbd1586de10.
+2. Copy the files of this repository inside the folder `ports/esp32`. You can create a tgz file `create_tgz.sh` for easy transfer.
 
-   If you don't want to replace the files `mpconfigport.h`, `main.h`, and `Makefile` make the following modifications to the original ones:
+   If you don't want to replace the files `mpconfigport.h`, `main.c`, and `Makefile` make the following modifications to the original ones:
     * `mpconfigport.h`
         1. add the line
         ```
@@ -87,6 +86,7 @@ Read this section if you want to include the camera support to MicroPython from 
 
     * `main.c`: modify the lines inside the `#if CONFIG_ESP32_SPIRAM_SUPPORT || CONFIG_SPIRAM_SUPPORT`, they should look like:
         ```
+            size_t mp_task_heap_size;
             mp_task_heap_size = 2 * 1024 * 1024;
             void *mp_task_heap = malloc(mp_task_heap_size);
             ESP_LOGI("main", "Allocated %dK for micropython heap at %p", mp_task_heap_size/1024, mp_task_heap);
