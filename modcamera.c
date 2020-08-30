@@ -11,6 +11,7 @@
 #include "esp_system.h"
 #include "esp_spi_flash.h"
 
+
 typedef struct _camera_obj_t {
     int8_t                 id;
     camera_config_t        config;
@@ -199,51 +200,32 @@ STATIC mp_obj_t camera_framesize(mp_obj_t what){
       }
     int size = mp_obj_get_int(what);
     /* same as in screen.h */
-    if (size == 0) {
-      s->set_framesize(s, FRAMESIZE_96X96); // 96x96
-    } else if (size == 1) {
-      s->set_framesize(s, FRAMESIZE_QQVGA); // 160x120
-    } else if (size == 2) {
-      s->set_framesize(s, FRAMESIZE_QCIF); // 176x144
-    } else if (size == 3) {
-      s->set_framesize(s, FRAMESIZE_HQVGA); // 240x176
-    } else if (size == 4) {
-      s->set_framesize(s, FRAMESIZE_240X240); // 240x240
-    } else if (size == 5) {
-      s->set_framesize(s, FRAMESIZE_QVGA); // 320x240
-    } else if (size == 6) {
-      s->set_framesize(s, FRAMESIZE_CIF); // 400x296
-    } else if (size == 7) {
-      s->set_framesize(s, FRAMESIZE_HVGA); // 480x320
-    } else if (size == 8) {
-      s->set_framesize(s, FRAMESIZE_VGA); // 640x480
-    } else if (size == 9) {
-      s->set_framesize(s, FRAMESIZE_SVGA); // 800x600
-    } else if (size == 10) {
-      s->set_framesize(s, FRAMESIZE_XGA); // 1024x768  (default)
-    } else if (size == 11) {
-      s->set_framesize(s, FRAMESIZE_HD); // 1280x720
-    } else if (size == 12) {
-      s->set_framesize(s, FRAMESIZE_SXGA); // 1280x1024
-    } else if (size == 13) {
-      s->set_framesize(s, FRAMESIZE_UXGA); // 1600x1200
-    } else if (size == 14) {
-      s->set_framesize(s, FRAMESIZE_FHD); // 1920x1080
-    } else if (size == 15) {
-      s->set_framesize(s, FRAMESIZE_P_HD); // 720x1280
-    } else if (size == 16) {
-      s->set_framesize(s, FRAMESIZE_P_3MP); // 864x1536
-    } else if (size == 17) {
-      s->set_framesize(s, FRAMESIZE_QXGA); // 2048x1536
-    } else if (size == 18) {
-      s->set_framesize(s, FRAMESIZE_QHD); // 2560x1440
-    } else if (size == 19) {
-      s->set_framesize(s, FRAMESIZE_WQXGA); // 2560x1600
-    } else if (size == 20) {
-      s->set_framesize(s, FRAMESIZE_P_FHD); // 1080x1920
-    } else if (size == 21) {
-      s->set_framesize(s, FRAMESIZE_QSXGA); // 2560x1920
+    if ((size != FRAMESIZE_96X96) &&
+        (size != FRAMESIZE_QQVGA) &&
+        (size != FRAMESIZE_QCIF) &&
+        (size != FRAMESIZE_HQVGA) &&
+        (size != FRAMESIZE_240X240) &&
+        (size != FRAMESIZE_QVGA) &&
+        (size != FRAMESIZE_CIF) &&
+        (size != FRAMESIZE_HVGA) &&
+        (size != FRAMESIZE_VGA) &&
+        (size != FRAMESIZE_SVGA) &&
+        (size != FRAMESIZE_XGA) &&
+        (size != FRAMESIZE_HD) &&
+        (size != FRAMESIZE_SXGA) &&
+        (size != FRAMESIZE_UXGA) &&
+        (size != FRAMESIZE_FHD) &&
+        (size != FRAMESIZE_P_HD) &&
+        (size != FRAMESIZE_P_3MP) &&
+        (size != FRAMESIZE_QXGA) &&
+        (size != FRAMESIZE_QHD) &&
+        (size != FRAMESIZE_WQXGA) &&
+        (size != FRAMESIZE_P_FHD) &&
+        (size != FRAMESIZE_QSXGA)) {
+        mp_raise_ValueError(MP_ERROR_TEXT("Image format is not valid"));
     }
+
+    s->set_framesize(s, size); 
 
     return mp_const_none;
 }
@@ -356,6 +338,44 @@ STATIC const mp_rom_map_elem_t camera_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_YUV422),          MP_ROM_INT(PIXFORMAT_YUV422) },
     { MP_ROM_QSTR(MP_QSTR_GRAYSCALE),       MP_ROM_INT(PIXFORMAT_GRAYSCALE) },
     { MP_ROM_QSTR(MP_QSTR_RGB565),          MP_ROM_INT(PIXFORMAT_RGB565) },
+    { MP_ROM_QSTR(MP_QSTR_FRAME_96X96),     MP_ROM_INT(FRAMESIZE_96X96) },
+    { MP_ROM_QSTR(MP_QSTR_FRAME_QQVGA),     MP_ROM_INT(FRAMESIZE_QQVGA) },
+    { MP_ROM_QSTR(MP_QSTR_FRAME_QCIF),      MP_ROM_INT(FRAMESIZE_QCIF) },
+    { MP_ROM_QSTR(MP_QSTR_FRAME_HQVGA),     MP_ROM_INT(FRAMESIZE_HQVGA) },
+    { MP_ROM_QSTR(MP_QSTR_FRAME_240X240),   MP_ROM_INT(FRAMESIZE_240X240) },
+    { MP_ROM_QSTR(MP_QSTR_FRAME_QVGA),      MP_ROM_INT(FRAMESIZE_QVGA) },
+    { MP_ROM_QSTR(MP_QSTR_FRAME_CIF),       MP_ROM_INT(FRAMESIZE_CIF) },
+    { MP_ROM_QSTR(MP_QSTR_FRAME_HVGA),      MP_ROM_INT(FRAMESIZE_HVGA) },
+    { MP_ROM_QSTR(MP_QSTR_FRAME_VGA),       MP_ROM_INT(FRAMESIZE_VGA) },
+    { MP_ROM_QSTR(MP_QSTR_FRAME_SVGA),      MP_ROM_INT(FRAMESIZE_SVGA) },
+    { MP_ROM_QSTR(MP_QSTR_FRAME_XGA),       MP_ROM_INT(FRAMESIZE_XGA) },
+    { MP_ROM_QSTR(MP_QSTR_FRAME_HD),        MP_ROM_INT(FRAMESIZE_HD) },
+    { MP_ROM_QSTR(MP_QSTR_FRAME_SXGA),      MP_ROM_INT(FRAMESIZE_SXGA) },
+    { MP_ROM_QSTR(MP_QSTR_FRAME_UXGA),      MP_ROM_INT(FRAMESIZE_UXGA) },
+    { MP_ROM_QSTR(MP_QSTR_FRAME_FHD),       MP_ROM_INT(FRAMESIZE_FHD) },
+    { MP_ROM_QSTR(MP_QSTR_FRAME_P_HD),      MP_ROM_INT(FRAMESIZE_P_HD) },
+    { MP_ROM_QSTR(MP_QSTR_FRAME_P_3MP),     MP_ROM_INT(FRAMESIZE_P_3MP) },
+    { MP_ROM_QSTR(MP_QSTR_FRAME_QXGA),      MP_ROM_INT(FRAMESIZE_QXGA) },
+    { MP_ROM_QSTR(MP_QSTR_FRAME_QHD),       MP_ROM_INT(FRAMESIZE_QHD) },
+    { MP_ROM_QSTR(MP_QSTR_FRAME_WQXGA),     MP_ROM_INT(FRAMESIZE_WQXGA) },
+    { MP_ROM_QSTR(MP_QSTR_FRAME_P_FHD),     MP_ROM_INT(FRAMESIZE_P_FHD) },
+    { MP_ROM_QSTR(MP_QSTR_FRAME_QSXGA),     MP_ROM_INT(FRAMESIZE_QSXGA) },
+    { MP_ROM_QSTR(MP_QSTR_FRAME_QSXGA),     MP_ROM_INT(FRAMESIZE_QSXGA) },
+
+    { MP_ROM_QSTR(MP_QSTR_WB_NONE),         MP_ROM_INT(WB_NONE) },
+    { MP_ROM_QSTR(MP_QSTR_WB_SUNNY),        MP_ROM_INT(WB_SUNNY) },
+    { MP_ROM_QSTR(MP_QSTR_WB_CLOUDY),       MP_ROM_INT(WB_CLOUDY) },
+    { MP_ROM_QSTR(MP_QSTR_WB_OFFICE),       MP_ROM_INT(WB_OFFICE) },
+    { MP_ROM_QSTR(MP_QSTR_WB_HOME),         MP_ROM_INT(WB_HOME) },
+
+    { MP_ROM_QSTR(MP_QSTR_EFFECT_NONE),     MP_ROM_INT(EFFECT_NONE) },
+    { MP_ROM_QSTR(MP_QSTR_EFFECT_NEG),      MP_ROM_INT(EFFECT_NEG) },
+    { MP_ROM_QSTR(MP_QSTR_EFFECT_BW),       MP_ROM_INT(EFFECT_BW) },
+    { MP_ROM_QSTR(MP_QSTR_EFFECT_RED),      MP_ROM_INT(EFFECT_RED) },
+    { MP_ROM_QSTR(MP_QSTR_EFFECT_GREEN),    MP_ROM_INT(EFFECT_GREEN) },
+    { MP_ROM_QSTR(MP_QSTR_EFFECT_BLUE),     MP_ROM_INT(EFFECT_BLUE) },
+    { MP_ROM_QSTR(MP_QSTR_EFFECT_RETRO),    MP_ROM_INT(EFFECT_RETRO) },
+
     { MP_ROM_QSTR(MP_QSTR_XCLK_10MHz),      MP_ROM_INT(XCLK_FREQ_10MHz) },
     { MP_ROM_QSTR(MP_QSTR_XCLK_20MHz),      MP_ROM_INT(XCLK_FREQ_20MHz) },
 
