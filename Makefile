@@ -179,12 +179,6 @@ INC_ESPCOMP += -I$(ESPCOMP)/pthread/include
 INC_ESPCOMP += -I$(ESPCOMP)/smartconfig_ack/include
 INC_ESPCOMP += -I$(ESPCOMP)/sdmmc/include
 
-INC_ESPCOMP += -I$(ESPCOMP)/esp32-camera/driver/include
-INC_ESPCOMP += -I$(ESPCOMP)/esp32-camera/driver/private_include
-INC_ESPCOMP += -I$(ESPCOMP)/esp32-camera/conversions/include
-INC_ESPCOMP += -I$(ESPCOMP)/esp32-camera/conversions/private_include
-INC_ESPCOMP += -I$(ESPCOMP)/esp32-camera/sensors/private_include
-
 ifeq ($(ESPIDF_CURHASH),$(ESPIDF_SUPHASH_V4))
 INC_ESPCOMP += -I$(ESPCOMP)/esp_common/include
 INC_ESPCOMP += -I$(ESPCOMP)/esp_eth/include
@@ -258,6 +252,12 @@ ifeq ($(MICROPY_PY_BLUETOOTH),1)
 CFLAGS_MOD += -DMICROPY_PY_BLUETOOTH=1
 CFLAGS_MOD += -DMICROPY_PY_BLUETOOTH_ENABLE_CENTRAL_MODE=1
 endif
+
+INC_ESPCOMP += -I$(ESPCOMP)/esp32-camera/driver/include
+INC_ESPCOMP += -I$(ESPCOMP)/esp32-camera/driver/private_include
+INC_ESPCOMP += -I$(ESPCOMP)/esp32-camera/conversions/include
+INC_ESPCOMP += -I$(ESPCOMP)/esp32-camera/conversions/private_include
+INC_ESPCOMP += -I$(ESPCOMP)/esp32-camera/sensors/private_include
 
 # these flags are common to C and C++ compilation
 CFLAGS_COMMON = -Os -ffunction-sections -fdata-sections -fstrict-volatile-bitfields \
@@ -333,6 +333,7 @@ SRC_C = \
 	mphalport.c \
 	fatfs_port.c \
 	help.c \
+	modcamera.c \
 	modutime.c \
 	moduos.c \
 	machine_timer.c \
@@ -359,7 +360,6 @@ SRC_C = \
 	machine_wdt.c \
 	mpthreadport.c \
 	machine_rtc.c \
-	modcamera.c \
 	machine_sdcard.c \
 	$(wildcard $(BOARD_DIR)/*.c) \
 	$(SRC_MOD)
@@ -609,10 +609,10 @@ endif
 endif
 
 ESP32_CAM_O = $(patsubst %.c,%.o,\
-	    $(wildcard $(ESPCOMP)/esp32-camera/driver/*.c) \
-	    $(wildcard $(ESPCOMP)/esp32-camera/sensors/*.c) \
-	    $(wildcard $(ESPCOMP)/esp32-camera/conversions/*.c) \
-	    )
+$(wildcard $(ESPCOMP)/esp32-camera/driver/*.c) \
+$(wildcard $(ESPCOMP)/esp32-camera/sensors/*.c) \
+$(wildcard $(ESPCOMP)/esp32-camera/conversions/*.c) \
+)
 
 OBJ_ESPIDF =
 LIB_ESPIDF =
@@ -654,9 +654,9 @@ $(eval $(call gen_espidf_lib_rule,mdns,$(ESPIDF_MDNS_O)))
 $(eval $(call gen_espidf_lib_rule,wpa_supplicant,$(ESPIDF_WPA_SUPPLICANT_O)))
 $(eval $(call gen_espidf_lib_rule,sdmmc,$(ESPIDF_SDMMC_O)))
 $(eval $(call gen_espidf_lib_rule,bt_nimble,$(ESPIDF_BT_NIMBLE_O)))
-$(eval $(call gen_espidf_lib_rule,esp32_cam,$(ESP32_CAM_O)))
 
 ifeq ($(ESPIDF_CURHASH),$(ESPIDF_SUPHASH_V4))
+$(eval $(call gen_espidf_lib_rule,esp32_cam,$(ESP32_CAM_O)))
 $(eval $(call gen_espidf_lib_rule,esp_common,$(ESPIDF_ESP_COMMON_O)))
 $(eval $(call gen_espidf_lib_rule,esp_event,$(ESPIDF_ESP_EVENT_O)))
 $(eval $(call gen_espidf_lib_rule,esp_wifi,$(ESPIDF_ESP_WIFI_O)))

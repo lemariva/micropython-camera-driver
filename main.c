@@ -78,7 +78,6 @@ void mp_task(void *pvParameter) {
     #endif
     uart_init();
 
-    
     // TODO: CONFIG_SPIRAM_SUPPORT is for 3.3 compatibility, remove after move to 4.0.
     #if CONFIG_ESP32_SPIRAM_SUPPORT || CONFIG_SPIRAM_SUPPORT
     // Try to use the entire external SPIRAM directly for the heap
@@ -87,6 +86,7 @@ void mp_task(void *pvParameter) {
     void *mp_task_heap = malloc(mp_task_heap_size);
     ESP_LOGI("main", "Allocated %dK for micropython heap at %p", mp_task_heap_size/1024, mp_task_heap);
     /*
+    size_t mp_task_heap_size;
     void *mp_task_heap = (void *)0x3f800000;
     switch (esp_spiram_get_chip_size()) {
         case ESP_SPIRAM_SIZE_16MBITS:
@@ -101,13 +101,13 @@ void mp_task(void *pvParameter) {
             mp_task_heap_size = heap_caps_get_largest_free_block(MALLOC_CAP_8BIT);
             mp_task_heap = malloc(mp_task_heap_size);
             break;
-    }*/
+    }
+    */
     #else
     // Allocate the uPy heap using malloc and get the largest available region
     size_t mp_task_heap_size = heap_caps_get_largest_free_block(MALLOC_CAP_8BIT);
     void *mp_task_heap = malloc(mp_task_heap_size);
     #endif
-    
 
 soft_reset:
     // initialise the stack pointer for the main thread
