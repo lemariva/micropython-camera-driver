@@ -105,6 +105,9 @@ Read this section if you want to include the camera support to MicroPython from 
     git clone --recursive https://github.com/micropython/micropython.git
     ```
     Note: The MicroPython repo changes a lot, I've done this using the version with the hash 18518e2 (release=`1.13.0`).
+
+    :warning: If you want to directly replace the original files with the provided in this repository, be sure that you've taken the same commit hash. MicroPython changes a lot, and you'll compiling issues if you ignore this warning.
+
 2. Copy the files of this repository inside the folder `ports/esp32`. You can create a tgz file `create_tgz.sh` for easy transfer.
 
    If you don't want to replace the files `mpconfigport.h`, `main.c`, and `Makefile` make the following modifications to the original ones:
