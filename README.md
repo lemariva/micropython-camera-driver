@@ -91,7 +91,7 @@ I've included a compiled MicroPython firmware with camera and BLE support (check
 To flash it to the board, you need to type the following:
 ```sh
 esptool.py --chip esp32 --port /dev/ttyUSB0 erase_flash
-esptool.py --chip esp32 --port /dev/ttyUSB0 --baud 460800 write_flash -z 0x1000 micropython_0fd0eb00a_esp32_idf4.x_ble_camera.bin
+esptool.py --chip esp32 --port /dev/ttyUSB0 --baud 460800 write_flash -z 0x1000 micropython_18518e2_esp32_idf4.x_ble_camera.bin
 ```
 More information is available in this [tutorial](https://lemariva.com/blog/2020/03/tutorial-getting-started-micropython-v20).
 
@@ -104,7 +104,7 @@ Read this section if you want to include the camera support to MicroPython from 
     ```
     git clone --recursive https://github.com/micropython/micropython.git
     ```
-    Note: The MicroPython repo changes a lot, I've done this using the version with the hash 0fd0eb00a (release=`1.13.0`).
+    Note: The MicroPython repo changes a lot, I've done this using the version with the hash 18518e2 (release=`1.13.0`).
 2. Copy the files of this repository inside the folder `ports/esp32`. You can create a tgz file `create_tgz.sh` for easy transfer.
 
    If you don't want to replace the files `mpconfigport.h`, `main.c`, and `Makefile` make the following modifications to the original ones:
