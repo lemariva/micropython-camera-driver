@@ -27,7 +27,8 @@ limiting &= 0xfc
 axp.write_byte( axp202.AXP202_IPS_SET, limiting )
 
 camera.init(0, d0=5, d1=14, d2=4, d3=15, d4=18, d5=23, d6=36, d7=39,
-            format=camera.JPEG, xclk_freq=camera.XCLK_20MHz,
+            format=camera.JPEG, framesize=camera.FRAMESIZE_VGA, 
+            xclk_freq=camera.XCLK_20MHz,
             href=25, vsync=27, reset=-1, pwdn=-1,
             sioc=12, siod=13, xclk=32, pclk=19)
 
@@ -91,7 +92,7 @@ I've included a compiled MicroPython firmware with camera and BLE support (check
 To flash it to the board, you need to type the following:
 ```sh
 esptool.py --chip esp32 --port /dev/ttyUSB0 erase_flash
-esptool.py --chip esp32 --port /dev/ttyUSB0 --baud 460800 write_flash -z 0x1000 micropython_18518e2_esp32_idf4.x_ble_camera.bin
+esptool.py --chip esp32 --port /dev/ttyUSB0 --baud 460800 write_flash -z 0x1000 micropython_b7883ce_esp32_idf4.x_ble_camera.bin
 ```
 More information is available in this [tutorial](https://lemariva.com/blog/2020/03/tutorial-getting-started-micropython-v20).
 
@@ -104,7 +105,7 @@ Read this section if you want to include the camera support to MicroPython from 
     ```
     git clone --recursive https://github.com/micropython/micropython.git
     ```
-    Note: The MicroPython repo changes a lot, I've done this using the version with the hash 18518e2 (release=`1.13.0`).
+    Note: The MicroPython repo changes a lot, I've done this using the version with the hash b7883ce (release=`1.13.0`).
 
     :warning: If you want to directly replace the original files with the provided in this repository, be sure that you've taken the same commit hash. MicroPython changes a lot, and you'll compiling issues if you ignore this warning.
 
