@@ -24,6 +24,7 @@ STATIC camera_obj_t camera_obj;
 STATIC bool camera_init_helper(camera_obj_t *camera, size_t n_pos_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
       enum {
         ARG_format,
+        ARG_framesize,
         ARG_quality,
         ARG_d0,
         ARG_d1,
@@ -47,6 +48,7 @@ STATIC bool camera_init_helper(camera_obj_t *camera, size_t n_pos_args, const mp
     //{ MP_QSTR_d0,              MP_ARG_KW_ONLY                   | MP_ARG_OBJ,   {.u_obj = MP_OBJ_NULL} },
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_format,          MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = PIXFORMAT_JPEG} },
+        { MP_QSTR_framesize,       MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = FRAMESIZE_UXGA} },
         { MP_QSTR_quality,         MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = 12} },
         { MP_QSTR_d0,              MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_D0} },
         { MP_QSTR_d1,              MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_D1} },
@@ -79,6 +81,33 @@ STATIC bool camera_init_helper(camera_obj_t *camera, size_t n_pos_args, const mp
         mp_raise_ValueError(MP_ERROR_TEXT("Image format is not valid"));
     }
 
+    int8_t size = args[ARG_framesize].u_int;
+    if ((size != FRAMESIZE_96X96) &&
+        (size != FRAMESIZE_QQVGA) &&
+        (size != FRAMESIZE_QCIF) &&
+        (size != FRAMESIZE_HQVGA) &&
+        (size != FRAMESIZE_240X240) &&
+        (size != FRAMESIZE_QVGA) &&
+        (size != FRAMESIZE_CIF) &&
+        (size != FRAMESIZE_HVGA) &&
+        (size != FRAMESIZE_VGA) &&
+        (size != FRAMESIZE_SVGA) &&
+        (size != FRAMESIZE_XGA) &&
+        (size != FRAMESIZE_HD) &&
+        (size != FRAMESIZE_SXGA) &&
+        (size != FRAMESIZE_UXGA) &&
+        (size != FRAMESIZE_FHD) &&
+        (size != FRAMESIZE_P_HD) &&
+        (size != FRAMESIZE_P_3MP) &&
+        (size != FRAMESIZE_QXGA) &&
+        (size != FRAMESIZE_QHD) &&
+        (size != FRAMESIZE_WQXGA) &&
+        (size != FRAMESIZE_P_FHD) &&
+        (size != FRAMESIZE_QSXGA)) {
+        mp_raise_ValueError(MP_ERROR_TEXT("Image framesize is not valid"));
+    }
+
+
     int32_t xclk_freq = args[ARG_FREQ].u_int;
     if ((xclk_freq != XCLK_FREQ_10MHz) &&
         (xclk_freq != XCLK_FREQ_20MHz)) {
@@ -110,7 +139,7 @@ STATIC bool camera_init_helper(camera_obj_t *camera, size_t n_pos_args, const mp
     camera->config.xclk_freq_hz = args[ARG_FREQ].u_int;
     camera->config.ledc_timer = LEDC_TIMER_0;
     camera->config.ledc_channel = LEDC_CHANNEL_0;
-    camera->config.frame_size = FRAMESIZE_UXGA;//QQVGA-QXGA Do not use sizes above QVGA when not JPEG
+    camera->config.frame_size = args[ARG_framesize].u_int; //QQVGA-QXGA Do not use sizes above QVGA when not JPEG
     camera->config.fb_count = 1; //if more than one, i2s runs in continuous mode. Use only with JPEG
 
     esp_err_t err = esp_camera_init(&camera->config);
@@ -222,7 +251,7 @@ STATIC mp_obj_t camera_framesize(mp_obj_t what){
         (size != FRAMESIZE_WQXGA) &&
         (size != FRAMESIZE_P_FHD) &&
         (size != FRAMESIZE_QSXGA)) {
-        mp_raise_ValueError(MP_ERROR_TEXT("Image format is not valid"));
+        mp_raise_ValueError(MP_ERROR_TEXT("Image framesize is not valid"));
     }
 
     s->set_framesize(s, size); 
@@ -338,6 +367,7 @@ STATIC const mp_rom_map_elem_t camera_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_YUV422),          MP_ROM_INT(PIXFORMAT_YUV422) },
     { MP_ROM_QSTR(MP_QSTR_GRAYSCALE),       MP_ROM_INT(PIXFORMAT_GRAYSCALE) },
     { MP_ROM_QSTR(MP_QSTR_RGB565),          MP_ROM_INT(PIXFORMAT_RGB565) },
+    
     { MP_ROM_QSTR(MP_QSTR_FRAME_96X96),     MP_ROM_INT(FRAMESIZE_96X96) },
     { MP_ROM_QSTR(MP_QSTR_FRAME_QQVGA),     MP_ROM_INT(FRAMESIZE_QQVGA) },
     { MP_ROM_QSTR(MP_QSTR_FRAME_QCIF),      MP_ROM_INT(FRAMESIZE_QCIF) },
