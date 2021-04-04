@@ -87,31 +87,41 @@ buf = camera.capture()
 * Using YUV or RGB puts a lot of strain on the chip because writing to PSRAM is not particularly fast. The result is that image data might be missing. This is particularly true if WiFi is enabled. If you need RGB data, it is recommended that JPEG is captured and then turned into RGB using `fmt2rgb888 or fmt2bmp/frame2bmp`. The conversion is not supported. The formats are included, but I got almost every time out of memory, trying to capture an image in a different format than JPEG.
 
 ## Firmware
-I've included a compiled MicroPython firmware with camera and BLE support (check the `firmware` folder). The firmware was compiled using esp-idf 4.x (hash 836bca9956d9f02b9c0f6f396dc76cbd1586de10).
+
+I've included a compiled MicroPython firmware with camera and BLE support (check the `firmware` folder). The firmware was compiled using esp-idf 4.x.
 
 To flash it to the board, you need to type the following:
 ```sh
 esptool.py --chip esp32 --port /dev/ttyUSB0 erase_flash
-esptool.py --chip esp32 --port /dev/ttyUSB0 --baud 460800 write_flash -z 0x1000 micropython_b7883ce_esp32_idf4.x_ble_camera.bin
+esptool.py --chip esp32 --port /dev/ttyUSB0 --baud 460800 write_flash -z 0x1000 micropython_cmake_9fef1c0bd_esp32_idf4.x_ble_camera.bin
 ```
 More information is available in this [tutorial](https://lemariva.com/blog/2020/03/tutorial-getting-started-micropython-v20).
 
 If you want to compile your driver from scratch follow the next section:
 
 ## DIY
-Read this section if you want to include the camera support to MicroPython from scratch. To do that follow these steps:
+
+- Read this section if you want to include the camera support to MicroPython from scratch. To do that follow these steps:
+- if you get stuck, those pages are a good help:
+  - https://github.com/micropython/micropython/tree/master/ports/esp32
+  - https://docs.espressif.com/projects/esp-idf/en/stable/esp32/get-started/index.html#installation-step-by-step
+
+- Note that up to micropython version 1.14, the build tool for the esp32 port is Make. Starting with this [PR](https://github.com/micropython/micropython/pull/6892), it is CMAKE. You can find more discussion in this [micropython forum blog post](https://forum.micropython.org/viewtopic.php?f=18&t=9820)
+- The below only works with Cmake
+
 
 1. Clone the MicroPython repository:
     ```
     git clone --recursive https://github.com/micropython/micropython.git
     ```
-    Note: The MicroPython repo changes a lot, I've done this using the version with the hash b7883ce (release=`1.13.0`).
+    Note: The MicroPython repo changes a lot, I've done this using the version with the hash 9fef1c0bd (release=`1.14.0-dirty`).
 
     :warning: If you want to directly replace the original files with the provided in this repository, be sure that you've taken the same commit hash. MicroPython changes a lot, and you'll compiling issues if you ignore this warning.
 
 2. Copy the files of this repository inside the folder `ports/esp32`. You can create a tgz file `create_tgz.sh` for easy transfer.
+   1. Did not include the `mpconfigport.h`, `main.c`, and `main/CMakeLists.txt` in here as this only makes sense for a final release of micropython and not a version in between two releases. 
 
-   If you don't want to replace the files `mpconfigport.h`, `main.c`, and `Makefile` make the following modifications to the original ones:
+3. For the files `mpconfigport.h`, `main.c`, and `main/CMakeLists.txt` make the following modifications to the original ones:
     * `mpconfigport.h`
         1. add the line
         ```
@@ -119,7 +129,7 @@ Read this section if you want to include the camera support to MicroPython from 
         ```
         in the code block below `// extra built in modules to add to the list of known ones` (approx. line 184)
 
-        2. add the line:
+        1. add the line:
         ```
             { MP_OBJ_NEW_QSTR(MP_QSTR_camera), (mp_obj_t)&mp_module_camera }, \
         ```
@@ -133,47 +143,27 @@ Read this section if you want to include the camera support to MicroPython from 
             ESP_LOGI("main", "Allocated %dK for micropython heap at %p", mp_task_heap_size/1024, mp_task_heap);
         ```
 
-    * `Makefile`:
-        1. add the lines:
-        ```
-            INC_ESPCOMP += -I$(ESPCOMP)/esp32-camera/driver/include
-            INC_ESPCOMP += -I$(ESPCOMP)/esp32-camera/driver/private_include
-            INC_ESPCOMP += -I$(ESPCOMP)/esp32-camera/conversions/include
-            INC_ESPCOMP += -I$(ESPCOMP)/esp32-camera/conversions/private_include
-            INC_ESPCOMP += -I$(ESPCOMP)/esp32-camera/sensors/private_include
-        ```
-        under the `# Compiler and linker flags`  (approx. line 135)
+    * `main/CMakeLists.txt`:
+        1. add the lines: `esp32-camera` under the `set(IDF_COMPONENTS`  (approx. line 78)
 
-        2. add the line:
-        ```
-            modcamera.c \
-        ```
-        inside the `SRC_C = \` block (approx. line 329 - after the above insertion)
+        2. add the line: `${PROJECT_DIR}/modcamera.c` under the `set(MICROPY_SOURCE_PORT` (approx. line 34)
 
-        3. add the lines:
-        ```
-            ESP32_CAM_O = $(patsubst %.c,%.o,\
-            $(wildcard $(ESPCOMP)/esp32-camera/driver/*.c) \
-            $(wildcard $(ESPCOMP)/esp32-camera/sensors/*.c) \
-            $(wildcard $(ESPCOMP)/esp32-camera/conversions/*.c) \
-            )
-        ```
-        above the line `OBJ_ESPIDF =` (approx. line 615 - after the above insertions)
-
-        4. add the line:
-        ```
-            $(eval $(call gen_espidf_lib_rule,esp32_cam,$(ESP32_CAM_O)))
-        ```
-        in the block above `ifeq ($(ESPIDF_CURHASH),$(ESPIDF_SUPHASH_V4))` (approx. line 655 - after the above insertions)
-
-3. Clone the `https://github.com/lemariva/esp32-camera` repository inside the `~/esp/esp-idf/components` folder.
+4. Clone the `https://github.com/lemariva/esp32-camera` repository inside the `~/esp/esp-idf/components` folder.
     ```sh
         cd ~/esp/esp-idf/components
-        git clone https://github.com/lemariva/esp32-camera.git
+        git clone https://github.com/espressif/esp32-camera
+        # it was compiled with this commit 2dded7c
+        git checkout 2dded7c
     ```
 
-4. Compile and deploy MicroPython following the instructions from this [tutorial](https://lemariva.com/blog/2020/03/tutorial-getting-started-micropython-v20). But, use the following compiling options:
+5. Compile and deploy MicroPython following the instructions from this [tutorial](https://lemariva.com/blog/2020/03/tutorial-getting-started-micropython-v20). But, use the following compiling options:
     ```sh
-    make BOARD=GENERIC_CAM PYTHON=python3 MICROPY_PY_BTREE=0 -j
-    make BOARD=GENERIC_CAM PYTHON=python3 MICROPY_PY_BTREE=0 -j deploy
+    # make sure the idf.py is in your path, can check it with 
+    which idf.py
+    # build
+    make BOARD=GENERIC_CAM
+    # flash
+    make BOARD=GENERIC_CAM deploy 
+    # or 
+    idf.py -B build-GENERIC_SPIRAM flash
     ```
