@@ -1,5 +1,18 @@
-#include "esp_camera.h"
-#include "esp_log.h"
+/*
+ * Copyright [2021] Mauro Riva <info@lemariva.com>
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #include <string.h>
 #include "py/nlr.h"
@@ -8,8 +21,13 @@
 #include "py/runtime.h"
 #include "py/binary.h"
 
+#if MODULE_CAMERA_ENABLED
+
 #include "esp_system.h"
 #include "esp_spi_flash.h"
+#include "esp_camera.h"
+#include "esp_log.h"
+
 
 
 typedef struct _camera_obj_t {
@@ -18,9 +36,7 @@ typedef struct _camera_obj_t {
     bool                   used;
 } camera_obj_t;
 
-STATIC camera_obj_t camera_obj;
-
-
+//STATIC camera_obj_t camera_obj;
 STATIC bool camera_init_helper(camera_obj_t *camera, size_t n_pos_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
       enum {
         ARG_format,
@@ -45,28 +61,28 @@ STATIC bool camera_init_helper(camera_obj_t *camera, size_t n_pos_args, const mp
         ARG_FREQ,
     };
 
-    //{ MP_QSTR_d0,              MP_ARG_KW_ONLY                   | MP_ARG_OBJ,   {.u_obj = MP_OBJ_NULL} },
+    //{ MP_QSTR_d0,              MP_ARG_KW_ONLY  | MP_ARG_OBJ,   {.u_obj = MP_OBJ_NULL} },
     static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_format,          MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = PIXFORMAT_JPEG} },
-        { MP_QSTR_framesize,       MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = FRAMESIZE_UXGA} },
-        { MP_QSTR_quality,         MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = 12} },
-        { MP_QSTR_d0,              MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_D0} },
-        { MP_QSTR_d1,              MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_D1} },
-        { MP_QSTR_d2,              MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_D2} },
-        { MP_QSTR_d3,              MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_D3} },
-        { MP_QSTR_d4,              MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_D4} },
-        { MP_QSTR_d5,              MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_D5} },
-        { MP_QSTR_d6,              MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_D6} },
-        { MP_QSTR_d7,              MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_D7} },
-        { MP_QSTR_vsync,           MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_VSYNC} },
-        { MP_QSTR_href,            MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_HREF} },
-        { MP_QSTR_pclk,            MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_PCLK} },
-        { MP_QSTR_pwdn,            MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_PWDN} },
-        { MP_QSTR_reset,           MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_RESET} },
-        { MP_QSTR_xclk,            MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_XCLK} },
-        { MP_QSTR_siod,            MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_SIOD} },
-        { MP_QSTR_sioc,            MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = CAM_PIN_SIOC} },
-        { MP_QSTR_xclk_freq,       MP_ARG_KW_ONLY                   | MP_ARG_INT,   {.u_int = XCLK_FREQ_10MHz} },
+        { MP_QSTR_format,          MP_ARG_KW_ONLY  | MP_ARG_INT,   {.u_int = PIXFORMAT_JPEG} },
+        { MP_QSTR_framesize,       MP_ARG_KW_ONLY  | MP_ARG_INT,   {.u_int = FRAMESIZE_UXGA} },
+        { MP_QSTR_quality,         MP_ARG_KW_ONLY  | MP_ARG_INT,   {.u_int = 12} },
+        { MP_QSTR_d0,              MP_ARG_KW_ONLY  | MP_ARG_INT,   {.u_int = CAM_PIN_D0} },
+        { MP_QSTR_d1,              MP_ARG_KW_ONLY  | MP_ARG_INT,   {.u_int = CAM_PIN_D1} },
+        { MP_QSTR_d2,              MP_ARG_KW_ONLY  | MP_ARG_INT,   {.u_int = CAM_PIN_D2} },
+        { MP_QSTR_d3,              MP_ARG_KW_ONLY  | MP_ARG_INT,   {.u_int = CAM_PIN_D3} },
+        { MP_QSTR_d4,              MP_ARG_KW_ONLY  | MP_ARG_INT,   {.u_int = CAM_PIN_D4} },
+        { MP_QSTR_d5,              MP_ARG_KW_ONLY  | MP_ARG_INT,   {.u_int = CAM_PIN_D5} },
+        { MP_QSTR_d6,              MP_ARG_KW_ONLY  | MP_ARG_INT,   {.u_int = CAM_PIN_D6} },
+        { MP_QSTR_d7,              MP_ARG_KW_ONLY  | MP_ARG_INT,   {.u_int = CAM_PIN_D7} },
+        { MP_QSTR_vsync,           MP_ARG_KW_ONLY  | MP_ARG_INT,   {.u_int = CAM_PIN_VSYNC} },
+        { MP_QSTR_href,            MP_ARG_KW_ONLY  | MP_ARG_INT,   {.u_int = CAM_PIN_HREF} },
+        { MP_QSTR_pclk,            MP_ARG_KW_ONLY  | MP_ARG_INT,   {.u_int = CAM_PIN_PCLK} },
+        { MP_QSTR_pwdn,            MP_ARG_KW_ONLY  | MP_ARG_INT,   {.u_int = CAM_PIN_PWDN} },
+        { MP_QSTR_reset,           MP_ARG_KW_ONLY  | MP_ARG_INT,   {.u_int = CAM_PIN_RESET} },
+        { MP_QSTR_xclk,            MP_ARG_KW_ONLY  | MP_ARG_INT,   {.u_int = CAM_PIN_XCLK} },
+        { MP_QSTR_siod,            MP_ARG_KW_ONLY  | MP_ARG_INT,   {.u_int = CAM_PIN_SIOD} },
+        { MP_QSTR_sioc,            MP_ARG_KW_ONLY  | MP_ARG_INT,   {.u_int = CAM_PIN_SIOC} },
+        { MP_QSTR_xclk_freq,       MP_ARG_KW_ONLY  | MP_ARG_INT,   {.u_int = XCLK_FREQ_10MHz} },
     };
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
@@ -142,11 +158,12 @@ STATIC bool camera_init_helper(camera_obj_t *camera, size_t n_pos_args, const mp
     camera->config.frame_size = args[ARG_framesize].u_int; //QQVGA-QXGA Do not use sizes above QVGA when not JPEG
     camera->config.fb_count = 1; //if more than one, i2s runs in continuous mode. Use only with JPEG
 
+    byte* psram_buffer = (byte*)m_malloc(500000);
+    
     esp_err_t err = esp_camera_init(&camera->config);
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "Camera Init Failed");
         mp_raise_msg(&mp_type_OSError, MP_ERROR_TEXT("Camera Init Failed"));
-
         return false;
     }
 
@@ -155,9 +172,10 @@ STATIC bool camera_init_helper(camera_obj_t *camera, size_t n_pos_args, const mp
 
 
 STATIC mp_obj_t camera_init(mp_uint_t n_pos_args, const mp_obj_t *pos_args, mp_map_t *kw_args) {
+    
+    camera_obj_t camera_obj;
 
     bool camera = camera_init_helper(&camera_obj, n_pos_args - 1, pos_args + 1, kw_args);
-
     if (camera) {
         return mp_const_true;
     }
@@ -413,7 +431,12 @@ STATIC const mp_rom_map_elem_t camera_module_globals_table[] = {
 
 STATIC MP_DEFINE_CONST_DICT(camera_module_globals, camera_module_globals_table);
 
-const mp_obj_module_t mp_module_camera = {
+const mp_obj_module_t mp_module_camera_system = {
     .base = { &mp_type_module },
     .globals = (mp_obj_dict_t *)&camera_module_globals,
 };
+
+MP_REGISTER_MODULE(MP_QSTR_camera, mp_module_camera_system, 1);
+
+
+#endif
