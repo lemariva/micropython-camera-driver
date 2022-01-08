@@ -6,6 +6,10 @@ I follow the advice of [#32](https://github.com/lemariva/micropython-camera-driv
 
 For more information about installing MicroPython visit this tutorial: https://lemariva.com/blog/2022/01/micropython-upgraded-support-cameras-m5camera-esp32-cam-etc
 
+The MicroPython example codes are included here:
+* [Webserver](https://github.com/lemariva/upyCam)
+* [Timelapse Camera](https://github.com/lemariva/upyCam/tree/timelapse-camera)
+
 ## Example
 ```python
 import camera
