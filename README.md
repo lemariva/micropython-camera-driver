@@ -10,6 +10,7 @@ The MicroPython example codes are included here:
 * [Webserver](https://github.com/lemariva/upyCam)
 * [Timelapse Camera](https://github.com/lemariva/upyCam/tree/timelapse-camera)
 
+
 ## Example
 ```python
 import camera
@@ -87,6 +88,7 @@ buf = camera.capture()
 ```
 
 ### Important
+* The ESP32-CAM module has a 4MB PSRAM. However, this RAM is not used by the camera while running MicroPython. Inside the `main.c` file between lines 100-140 MicroPython takes over the entire SPIRAM region and uses it for the GC heap. Thus, it is not possible to use any RTOS functions to allocate memory there. If you want that the esp32-camera code allocates memory in the SPIRAM then the logic in `mp_task()` that allocates the MicroPython GC heap will need to be changed. I tried that, but without any success.
 * Except when using CIF or lower resolution with JPEG, the driver requires PSRAM to be installed and activated. This is activated, but it is limited due that MicroPython needs RAM.
 * Using YUV or RGB puts a lot of strain on the chip because writing to PSRAM is not particularly fast. The result is that image data might be missing. This is particularly true if WiFi is enabled. If you need RGB data, it is recommended that JPEG is captured and then turned into RGB using `fmt2rgb888 or fmt2bmp/frame2bmp`. The conversion is not supported. The formats are included, but I got almost every time out of memory, trying to capture an image in a different format than JPEG.
 * The firmware was compiled without BLE support. Otherwise I got `region 'iram0_0_seg' overflowed by 468 bytes`.
@@ -99,9 +101,9 @@ I've included a compiled MicroPython firmware with camera (check the `firmware` 
 To flash it to the board, you need to type the following:
 ```sh
 esptool.py --chip esp32 --port /dev/ttyUSB0 erase_flash
-esptool.py --chip esp32 --port /dev/ttyUSB0 --baud 460800 write_flash -z 0x1000 micropython_cmake_22cf0940_esp32_idf4_4_2_camera.bin
+esptool.py --chip esp32 --port /dev/ttyUSB0 --baud 460800 write_flash -z 0x1000 micropython_cmake_60e05ae_esp32_idf4_4_camera.bin
 ```
-More information is available in this [tutorial](https://lemariva.com/blog/2020/03/tutorial-getting-started-micropython-v20).
+More information is available in this [tutorial](https://lemariva.com/blog/2022/01/micropython-upgraded-support-cameras-m5camera-esp32-cam-etc).
 
 If you want to compile your driver from scratch follow the next section:
 
@@ -120,38 +122,11 @@ Read this section if you want to include the camera support to MicroPython from 
     ```
     git clone --recursive https://github.com/micropython/micropython.git
     ```
-    Note: The MicroPython repo changes a lot, I've done this using the version with the hash [`22cf0940`](https://github.com/micropython/micropython/commit/22cf0940e134453dee6fd6c617b28ecd1ec50943) (release=`v1.17-318-g22cf0940e-dirty`).
+    Note: The MicroPython repo changes a lot, I've done this using the version with the hash [`60e05ae84`](https://github.com/micropython/micropython/commit/60e05ae84ec08c06e3f9d9051339811641479a94) (release=`v1.18-63-g60e05ae84-dirty`).
 
     :warning: If you want to directly replace the original files with the provided in this repository, be sure that you've taken the same commit hash. MicroPython changes a lot, and you'll compiling issues if you ignore this warning.
 
-2. Make the following modification on these files:
-    * `main.c`: modify the lines inside the `#if CONFIG_ESP32_SPIRAM_SUPPORT || CONFIG_SPIRAM_SUPPORT`, they should look like:
-        ```
-            /*
-            // Try to use the entire external SPIRAM directly for the heap
-            size_t mp_task_heap_size;
-            void *mp_task_heap = (void *)SOC_EXTRAM_DATA_LOW;
-            switch (esp_spiram_get_chip_size()) {
-                case ESP_SPIRAM_SIZE_16MBITS:
-                    mp_task_heap_size = 2 * 1024 * 1024;
-                    break;
-                case ESP_SPIRAM_SIZE_32MBITS:
-                case ESP_SPIRAM_SIZE_64MBITS:
-                    mp_task_heap_size = 4 * 1024 * 1024;
-                    break;
-                default:
-                    // No SPIRAM, fallback to normal allocation
-                    mp_task_heap_size = heap_caps_get_largest_free_block(MALLOC_CAP_8BIT);
-                    mp_task_heap = malloc(mp_task_heap_size);
-                    break;
-            }
-            */
-            size_t mp_task_heap_size;
-            mp_task_heap_size = 2 * 1024 * 1024;
-            void *mp_task_heap = malloc(mp_task_heap_size);
-            ESP_LOGI("main", "Allocated %dK for micropython heap at %p", mp_task_heap_size/1024, mp_task_heap);
-        ```
-        Otherwise, you'll get the runtime error `Guru Meditation Error: Core 0 panic'ed (LoadStoreAlignment)` while loading the camera driver.
+2. Make the following modification on following file(s):
     * If you have the following error by compiling: 
         ```
         micropython/lib/berkeley-db-1.xx/PORT/include/db.h:1:1: error: expected identifier or '(' before '.' token ../../include/db.h
@@ -167,13 +142,13 @@ Read this section if you want to include the camera support to MicroPython from 
     ```sh
         cd ~/esp/esp-idf/components
         git clone https://github.com/espressif/esp32-camera
-        # it was compiled with this commit 221d24da1901b6aee8df6c1a1160ad02faa685b5
-        git checkout 221d24da1901b6aee8df6c1a1160ad02faa685b5
+        # it was compiled with this commit 093688e0b3521ac982bc3d38bbf92059d97e3613
+        git checkout 093688e0b3521ac982bc3d38bbf92059d97e3613
     ```
 5. Compile the firmware by typing following commands:
     ```
     cd micropython/ports/esp32
-    make USER_C_MODULES=../../../../micropython-camera-driver/src/micropython.cmake  BOARD=GENERIC_CAM all
+    make USER_C_MODULES=../../../../micropython-camera-driver/src/micropython.cmake BOARD=GENERIC_CAM all
     ```
     Note that the folder `micropython-camera-driver` should be in the same folder level as the `micropython`. Otherwise, you'll need to change the path (`../../../../micropython-camera-driver/src/`) to the `micropython.cmake` file.
 6. Deploy the firmware into the ESP32 by typing:

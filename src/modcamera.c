@@ -59,12 +59,14 @@ STATIC bool camera_init_helper(camera_obj_t *camera, size_t n_pos_args, const mp
         ARG_SIOD,
         ARG_SIOC,
         ARG_FREQ,
+        ARG_FBSIZE,
+        ARG_FBLOC,
     };
 
     //{ MP_QSTR_d0,              MP_ARG_KW_ONLY  | MP_ARG_OBJ,   {.u_obj = MP_OBJ_NULL} },
     static const mp_arg_t allowed_args[] = {
         { MP_QSTR_format,          MP_ARG_KW_ONLY  | MP_ARG_INT,   {.u_int = PIXFORMAT_JPEG} },
-        { MP_QSTR_framesize,       MP_ARG_KW_ONLY  | MP_ARG_INT,   {.u_int = FRAMESIZE_UXGA} },
+        { MP_QSTR_framesize,       MP_ARG_KW_ONLY  | MP_ARG_INT,   {.u_int = FRAMESIZE_VGA} },
         { MP_QSTR_quality,         MP_ARG_KW_ONLY  | MP_ARG_INT,   {.u_int = 12} },
         { MP_QSTR_d0,              MP_ARG_KW_ONLY  | MP_ARG_INT,   {.u_int = CAM_PIN_D0} },
         { MP_QSTR_d1,              MP_ARG_KW_ONLY  | MP_ARG_INT,   {.u_int = CAM_PIN_D1} },
@@ -83,6 +85,8 @@ STATIC bool camera_init_helper(camera_obj_t *camera, size_t n_pos_args, const mp
         { MP_QSTR_siod,            MP_ARG_KW_ONLY  | MP_ARG_INT,   {.u_int = CAM_PIN_SIOD} },
         { MP_QSTR_sioc,            MP_ARG_KW_ONLY  | MP_ARG_INT,   {.u_int = CAM_PIN_SIOC} },
         { MP_QSTR_xclk_freq,       MP_ARG_KW_ONLY  | MP_ARG_INT,   {.u_int = XCLK_FREQ_10MHz} },
+        { MP_QSTR_fb_size,         MP_ARG_KW_ONLY  | MP_ARG_INT,   {.u_int = 1} },
+        { MP_QSTR_fb_location,     MP_ARG_KW_ONLY  | MP_ARG_INT,   {.u_int = CAMERA_FB_IN_DRAM} },
     };
 
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
@@ -156,9 +160,9 @@ STATIC bool camera_init_helper(camera_obj_t *camera, size_t n_pos_args, const mp
     camera->config.ledc_timer = LEDC_TIMER_0;
     camera->config.ledc_channel = LEDC_CHANNEL_0;
     camera->config.frame_size = args[ARG_framesize].u_int; //QQVGA-QXGA Do not use sizes above QVGA when not JPEG
-    camera->config.fb_count = 1; //if more than one, i2s runs in continuous mode. Use only with JPEG
-
-    byte* psram_buffer = (byte*)m_malloc(500000);
+    camera->config.fb_count = args[ARG_FBSIZE].u_int;      //if more than one, i2s runs in continuous mode. Use only with JPEG
+    camera->config.fb_location = args[ARG_FBLOC].u_int;
+    camera->config.grab_mode = CAMERA_GRAB_WHEN_EMPTY;
     
     esp_err_t err = esp_camera_init(&camera->config);
     if (err != ESP_OK) {
@@ -426,6 +430,9 @@ STATIC const mp_rom_map_elem_t camera_module_globals_table[] = {
 
     { MP_ROM_QSTR(MP_QSTR_XCLK_10MHz),      MP_ROM_INT(XCLK_FREQ_10MHz) },
     { MP_ROM_QSTR(MP_QSTR_XCLK_20MHz),      MP_ROM_INT(XCLK_FREQ_20MHz) },
+
+    { MP_ROM_QSTR(MP_QSTR_DRAM),            MP_ROM_INT(CAMERA_FB_IN_DRAM) },
+    { MP_ROM_QSTR(MP_QSTR_PSRAM),           MP_ROM_INT(CAMERA_FB_IN_PSRAM) },
 
 };
 
