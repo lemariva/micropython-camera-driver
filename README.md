@@ -95,13 +95,18 @@ buf = camera.capture()
 
 ## Firmware
 
-I've included a compiled MicroPython firmware with camera (check the `firmware` folder). The firmware was compiled using esp-idf v4.3.2 ([8bf14a9](https://github.com/espressif/esp-idf/commit/8bf14a9238329954c7c5062eeeda569529aedf75))
+I've included a compiled MicroPython firmware with camera (check the `firmware` folder). The firmware was compiled using following versions and hashes:
+
+
+* esp-idf v4.4.x - [`b64925c56`](https://github.com/espressif/esp-idf/commit/b64925c5673206100eaf4337d064d0fe3507eaec)
+* MicroPython v1.18-63-g60e05ae84-dirty - [`60e05ae84`](https://github.com/micropython/micropython/commit/60e05ae84ec08c06e3f9d9051339811641479a94)
+* esp32-camera - [`093688e`](https://github.com/espressif/esp32-camera/commit/093688e0b3521ac982bc3d38bbf92059d97e3613) 
 
 
 To flash it to the board, you need to type the following:
 ```sh
 esptool.py --chip esp32 --port /dev/ttyUSB0 erase_flash
-esptool.py --chip esp32 --port /dev/ttyUSB0 --baud 460800 write_flash -z 0x1000 micropython_cmake_60e05ae_esp32_idf4_4_camera.bin
+esptool.py --chip esp32 --port /dev/ttyUSB0 --baud 1152000 write_flash -z 0x1000 micropython_cmake_60e05ae_esp32_idf4_4_camera.bin
 ```
 More information is available in this [tutorial](https://lemariva.com/blog/2022/01/micropython-upgraded-support-cameras-m5camera-esp32-cam-etc).
 
@@ -122,7 +127,7 @@ Read this section if you want to include the camera support to MicroPython from 
     ```
     git clone --recursive https://github.com/micropython/micropython.git
     ```
-    Note: The MicroPython repo changes a lot, I've done this using the version with the hash [`60e05ae84`](https://github.com/micropython/micropython/commit/60e05ae84ec08c06e3f9d9051339811641479a94) (release=`v1.18-63-g60e05ae84-dirty`).
+    Note: The MicroPython repo changes a lot, I've done this using the version with the hash mentioned above.
 
     :warning: If you want to directly replace the original files with the provided in this repository, be sure that you've taken the same commit hash. MicroPython changes a lot, and you'll compiling issues if you ignore this warning.
 
@@ -142,8 +147,7 @@ Read this section if you want to include the camera support to MicroPython from 
     ```sh
         cd ~/esp/esp-idf/components
         git clone https://github.com/espressif/esp32-camera
-        # it was compiled with this commit 093688e0b3521ac982bc3d38bbf92059d97e3613
-        git checkout 093688e0b3521ac982bc3d38bbf92059d97e3613
+        git checkout [CHECK-HASH-ABOVE]
     ```
 5. Compile the firmware by typing following commands:
     ```
