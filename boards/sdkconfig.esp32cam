@@ -1,6 +1,0 @@
-# MicroPython on ESP32, ESP IDF configuration with SPIRAM support
-# The following options override the defaults
-
-# ESP32-CAMERA
-CONFIG_OV2640_SUPPORT=y
-#CONFIG_OV7725_SUPPORT=y
