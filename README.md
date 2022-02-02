@@ -132,7 +132,7 @@ Read this section if you want to include the camera support to MicroPython from 
 
     :warning: If you want to directly replace the original files with the provided in this repository, be sure that you've taken the same commit hash. MicroPython changes a lot, and you'll compiling issues if you ignore this warning.
   
-2. Copy the files and folders inside the `boards` folder into `micropython/ports/esp32/boards`. Or use a symbolic link `ln -s micropython/ports/esp32/boards/ESP32_CAM [...]/micropython-camera-driver/boards/ESP32_CAM` (recommended - change the `[...]` to the right path).
+2. Copy the files and folders inside the `boards` folder into `micropython/ports/esp32/boards`. Or use a symbolic link `ln -s [...]/micropython-camera-driver/boards/ESP32_CAM micropython/ports/esp32/boards/ESP32_CAM ` (recommended - change the `[...]` to the right path).
 3. Clone the `https://github.com/espressif/esp32-camera` repository inside the `~/esp/esp-idf/components` folder.
     ```sh
         cd ~/esp/esp-idf/components
