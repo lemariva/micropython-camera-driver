@@ -24,7 +24,7 @@
 #if MODULE_CAMERA_ENABLED
 
 #include "esp_system.h"
-#include "esp_spi_flash.h"
+#include "spi_flash_mmap.h"
 #include "esp_camera.h"
 #include "esp_log.h"
 
