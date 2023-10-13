@@ -1,0 +1,2 @@
+
+ESP32_GENERIC with SPIRAM and OV2640 camera
