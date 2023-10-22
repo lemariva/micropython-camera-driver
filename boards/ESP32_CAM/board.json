@@ -1,0 +1,20 @@
+{
+    "deploy": [
+        "../deploy.md"
+    ],
+    "docs": "",
+    "features": [
+        "External Flash",
+        "WiFi"
+    ],
+    "images": [
+        "esp32_devkitc.jpg"
+    ],
+    "mcu": "esp32",
+    "product": "ESP32 / CAM",
+    "thumbnail": "",
+    "url": "https://www.espressif.com/en/products/modules",
+    "variants": {
+    },
+    "vendor": "Espressif"
+}

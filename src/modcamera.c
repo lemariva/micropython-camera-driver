@@ -24,7 +24,7 @@
 #if MODULE_CAMERA_ENABLED
 
 #include "esp_system.h"
-#include "esp_spi_flash.h"
+#include "spi_flash_mmap.h"
 #include "esp_camera.h"
 #include "esp_log.h"
 
@@ -443,7 +443,7 @@ const mp_obj_module_t mp_module_camera_system = {
     .globals = (mp_obj_dict_t *)&camera_module_globals,
 };
 
-MP_REGISTER_MODULE(MP_QSTR_camera, mp_module_camera_system, MODULE_CAMERA_ENABLED);
+MP_REGISTER_MODULE(MP_QSTR_camera, mp_module_camera_system);
 
 
 #endif

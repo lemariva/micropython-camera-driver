@@ -98,11 +98,11 @@ buf = camera.capture()
 
 I've included a compiled MicroPython firmware with camera (check the `firmware` folder). The firmware was compiled using following versions and hashes:
 
-
 * esp-idf v4.4.x - [`b64925c56`](https://github.com/espressif/esp-idf/commit/b64925c5673206100eaf4337d064d0fe3507eaec)
 * MicroPython v1.18-63-feeeb5ea3-dirty - [`feeeb5ea3`](https://github.com/micropython/micropython/commit/feeeb5ea3afe801b381eb5d4b310e83290634c46)
 * esp32-camera - [`093688e`](https://github.com/espressif/esp32-camera/commit/093688e0b3521ac982bc3d38bbf92059d97e3613) 
 
+There is also a more current firmware based on MicroPython v1.21.0, ESP-IDF v5.0.2 and esp32-camera v2.0.5.
 
 To flash it to the board, you need to type the following:
 ```sh
@@ -123,6 +123,7 @@ Read this section if you want to include the camera support to MicroPython from 
 
 - Note 2: Up to micropython version 1.14, the build tool for the esp32 port is Make. Starting with this [PR](https://github.com/micropython/micropython/pull/6892), it is CMAKE. You can find more discussion in this [micropython forum blog post](https://forum.micropython.org/viewtopic.php?f=18&t=9820)
 
+- Note 3: The steps below now also work for MicroPython v1.21.0, ESP-IDF v5.0.2 and esp32-camera v2.0.5.
 
 1. Clone the MicroPython repository:
     ```
